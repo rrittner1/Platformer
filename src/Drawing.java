@@ -12,7 +12,9 @@ public class Drawing extends JPanel {
     public static final int LOAD_MENU = 4;
     public static final int CREATE_MENU = 5;
     public static final int HOVER_CREATE_BACK = 6;
-    public static final int HOVER_LOAD_BACK= 7;
+    public static final int HOVER_LOAD_BACK = 7;
+    public static final int HOVER_CREATE_INSTRUCTIONS = 8;
+    public static final int HOVER_CREATE_DRAW = 9;
     //drawingStates
     public static final int DEFAULT_MENU_STATE = 0;
     public static final int DEFAULT_HOVER_STATE = -1;
@@ -20,9 +22,14 @@ public class Drawing extends JPanel {
     public static final int CREATE_HOVER_STATE = -3;
     public static final int LOAD_MENU_STATE = -4;
     public static final int LOAD_HOVER_STATE = -5;
+    //specialStates
+    public static final int BASE_STATE = 100;
+    public static final int DRAWING_STATE = 101;
+    public static final int DELETE_STATE = 102;
 
     int paintInstructions;
     int drawingState;
+    int specialState;
     Manager m;
 
     public Drawing(Manager m) {
@@ -30,6 +37,7 @@ public class Drawing extends JPanel {
         this.m = m;
         paintInstructions = DEFAULT_MENU;
         drawingState = DEFAULT_MENU_STATE;
+        specialState = BASE_STATE;
     }
 
     public void paint(int paintInstructions) {
@@ -47,11 +55,11 @@ public class Drawing extends JPanel {
                 drawingState = DEFAULT_MENU_STATE;
                 break;
             case HOVER_LOAD_BUTTON:
-                drawRectangle(g2, Manager.LOAD_BUTTON_BOUNDS, 4);
+                drawRectangle(g2, Manager.LOAD_BUTTON, 4);
                 drawingState = DEFAULT_HOVER_STATE;
                 break;
             case HOVER_CREATE_BUTTON:
-                drawRectangle(g2, Manager.CREATE_BUTTON_BOUNDS, 4);
+                drawRectangle(g2, Manager.CREATE_BUTTON, 4);
                 drawingState = DEFAULT_HOVER_STATE;
                 break;
             case LOAD_MENU:
@@ -65,12 +73,20 @@ public class Drawing extends JPanel {
                 drawingState = CREATE_MENU_STATE;
                 break;
             case HOVER_CREATE_BACK:
-                drawRectangle(g2, Manager.BACK_BUTTON_BOUNDS, 4);
+                drawRectangle(g2, Manager.BACK_BUTTON, 4);
                 drawingState = CREATE_HOVER_STATE;
                 break;
             case HOVER_LOAD_BACK:
-                drawRectangle(g2, Manager.BACK_BUTTON_BOUNDS, 4);
+                drawRectangle(g2, Manager.BACK_BUTTON, 4);
                 drawingState = LOAD_HOVER_STATE;
+                break;
+            case HOVER_CREATE_INSTRUCTIONS:
+                drawRectangle(g2, Manager.INSTRUCTIONS_BUTTON, 4);
+                drawingState = CREATE_HOVER_STATE;
+                break;
+            case HOVER_CREATE_DRAW:
+                drawRectangle(g2, Manager.DRAW_BUTTON, 4);
+                drawingState = CREATE_HOVER_STATE;
                 break;
         }
     }
@@ -95,19 +111,25 @@ public class Drawing extends JPanel {
         g2.setFont(new Font("", Font.PLAIN, 20));
         g2.drawString("Load Level", 247, 250);
         g2.drawString("Create Level", 241, 300);
-        drawRectangle(g2, Manager.LOAD_BUTTON_BOUNDS, 2);
-        drawRectangle(g2, Manager.CREATE_BUTTON_BOUNDS, 2);
+        drawRectangle(g2, Manager.LOAD_BUTTON, 2);
+        drawRectangle(g2, Manager.CREATE_BUTTON, 2);
     }
 
     public void createMenuDraw(Graphics2D g2) {
         g2.setFont(new Font("", Font.PLAIN, 20));
-        g2.drawString("Back", 50, 55);
-        drawRectangle(g2, Manager.BACK_BUTTON_BOUNDS, 2);
+        g2.drawString("Back", 50, 56);
+        drawRectangle(g2, Manager.BACK_BUTTON, 2);
+
+        g2.drawString("Instructions", 427, 56);
+        drawRectangle(g2, Manager.INSTRUCTIONS_BUTTON, 2);
+
+        g2.drawString("Draw", 50, 514);
+        drawRectangle(g2, Manager.DRAW_BUTTON, 2);
     }
 
     public void loadMenuDraw(Graphics2D g2) {
         g2.setFont(new Font("", Font.PLAIN, 20));
         g2.drawString("Back", 50, 55);
-        drawRectangle(g2, Manager.BACK_BUTTON_BOUNDS, 2);
+        drawRectangle(g2, Manager.BACK_BUTTON, 2);
     }
 }

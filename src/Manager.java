@@ -3,9 +3,11 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Manager implements Runnable {
-    static final Rectangle LOAD_BUTTON_BOUNDS = new Rectangle(230, 225, 135, 35);
-    static final Rectangle CREATE_BUTTON_BOUNDS = new Rectangle(230, 275, 135, 35);
-    static final Rectangle BACK_BUTTON_BOUNDS = new Rectangle(42, 32, 60, 35);
+    static final Rectangle LOAD_BUTTON = new Rectangle(230, 225, 135, 35);
+    static final Rectangle CREATE_BUTTON = new Rectangle(230, 275, 135, 35);
+    static final Rectangle BACK_BUTTON = new Rectangle(42, 32, 60, 35);
+    static final Rectangle INSTRUCTIONS_BUTTON = new Rectangle(415, 32, 125, 35);
+    static final Rectangle DRAW_BUTTON = new Rectangle(42, 490, 60, 35);
 
     JFrame frame;
     Drawing canvas;
@@ -56,20 +58,28 @@ public class Manager implements Runnable {
 
     public void mouseClicked(MouseEvent e) {
         Point loc = e.getPoint();
-        if (canvas.drawingState == Drawing.DEFAULT_HOVER_STATE) {
-            if (LOAD_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.LOAD_MENU);
-            } else if (CREATE_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.CREATE_MENU);
-            }
-        } else if (canvas.drawingState == Drawing.CREATE_HOVER_STATE) {
-            if (BACK_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.DEFAULT_MENU);
-            }
-        } else if (canvas.drawingState == Drawing.LOAD_HOVER_STATE) {
-            if (BACK_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.DEFAULT_MENU);
-            }
+        switch (canvas.drawingState) {
+            case Drawing.DEFAULT_HOVER_STATE:
+                if (LOAD_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.LOAD_MENU);
+                } else if (CREATE_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.CREATE_MENU);
+                }
+                break;
+            case Drawing.CREATE_HOVER_STATE:
+                if (BACK_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.DEFAULT_MENU);
+                } else if (INSTRUCTIONS_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.DEFAULT_MENU); // This is a placeholder
+                } else if (DRAW_BUTTON.contains(loc)) {
+                    // do something
+                }
+                break;
+            case Drawing.LOAD_HOVER_STATE:
+                if (BACK_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.DEFAULT_MENU);
+                }
+                break;
         }
     }
 
@@ -95,32 +105,44 @@ public class Manager implements Runnable {
 
     public void mouseMoved(MouseEvent e) {
         Point loc = e.getPoint();
-        if (canvas.drawingState == Drawing.DEFAULT_MENU_STATE) {
-            if (LOAD_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.HOVER_LOAD_BUTTON);
-            } else if (CREATE_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.HOVER_CREATE_BUTTON);
-            }
-        } else if (canvas.drawingState == Drawing.DEFAULT_HOVER_STATE) {
-            if (!LOAD_BUTTON_BOUNDS.contains(loc) && !CREATE_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.DEFAULT_MENU);
-            }
-        } else if (canvas.drawingState == Drawing.CREATE_MENU_STATE) {
-            if (BACK_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.HOVER_CREATE_BACK);
-            }
-        } else if (canvas.drawingState == Drawing.CREATE_HOVER_STATE) {
-            if (!BACK_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.CREATE_MENU);
-            }
-        } else if (canvas.drawingState == Drawing.LOAD_MENU_STATE) {
-            if (BACK_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.HOVER_LOAD_BACK);
-            }
-        } else if (canvas.drawingState == Drawing.LOAD_HOVER_STATE) {
-            if (!BACK_BUTTON_BOUNDS.contains(loc)) {
-                canvas.paint(Drawing.LOAD_MENU);
-            }
+        switch (canvas.drawingState) {
+            case Drawing.DEFAULT_MENU_STATE:
+                if (LOAD_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_LOAD_BUTTON);
+                } else if (CREATE_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_CREATE_BUTTON);
+                }
+                break;
+            case Drawing.DEFAULT_HOVER_STATE:
+                if (!LOAD_BUTTON.contains(loc) && !CREATE_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.DEFAULT_MENU);
+                }
+                break;
+            case Drawing.CREATE_MENU_STATE:
+                if (BACK_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_CREATE_BACK);
+                } else if (INSTRUCTIONS_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_CREATE_INSTRUCTIONS);
+                } else if (DRAW_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_CREATE_DRAW);
+                }
+                break;
+            case Drawing.CREATE_HOVER_STATE:
+                if (!BACK_BUTTON.contains(loc) && !INSTRUCTIONS_BUTTON.contains(loc) &&
+                        !DRAW_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.CREATE_MENU);
+                }
+                break;
+            case Drawing.LOAD_MENU_STATE:
+                if (BACK_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_LOAD_BACK);
+                }
+                break;
+            case Drawing.LOAD_HOVER_STATE:
+                if (!BACK_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.LOAD_MENU);
+                }
+                break;
         }
     }
 
