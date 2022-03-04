@@ -3,6 +3,10 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Manager implements Runnable {
+    static final Rectangle LOAD_BUTTON_BOUNDS = new Rectangle(230, 225, 135, 35);
+    static final Rectangle CREATE_BUTTON_BOUNDS = new Rectangle(230, 275, 135, 35);
+    static final Rectangle BACK_BUTTON_BOUNDS = new Rectangle(42, 32, 60, 35);
+
     JFrame frame;
     Drawing canvas;
     Listener listener;
@@ -27,7 +31,7 @@ public class Manager implements Runnable {
             }
         });
         contentPane = frame.getContentPane();
-        canvas = new Drawing();
+        canvas = new Drawing(this);
         canvas.setBounds(0, 0, 600, 600);
         listener = new Listener(this);
         listener.setBounds(0, 0, 600, 600);
@@ -47,11 +51,26 @@ public class Manager implements Runnable {
      * Initial graphical setup of menu screen
      */
     public void menuSetup() {
-        canvas.paint(Drawing.PAINT_MENU);
+        canvas.paint(Drawing.DEFAULT_MENU);
     }
 
     public void mouseClicked(MouseEvent e) {
-
+        Point loc = e.getPoint();
+        if (canvas.drawingState == Drawing.DEFAULT_HOVER_STATE) {
+            if (LOAD_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.LOAD_MENU);
+            } else if (CREATE_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.CREATE_MENU);
+            }
+        } else if (canvas.drawingState == Drawing.CREATE_HOVER_STATE) {
+            if (BACK_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.DEFAULT_MENU);
+            }
+        } else if (canvas.drawingState == Drawing.LOAD_HOVER_STATE) {
+            if (BACK_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.DEFAULT_MENU);
+            }
+        }
     }
 
     public void mousePressed(MouseEvent e) {
@@ -76,12 +95,32 @@ public class Manager implements Runnable {
 
     public void mouseMoved(MouseEvent e) {
         Point loc = e.getPoint();
-        if (canvas.drawingState != -1 && loc.x >= 230 && loc.x <= 365 && loc.y >= 225 && loc.y <= 260) {
-            canvas.paint(Drawing.HOVER_LOAD_BUTTON);
-        } else if (canvas.drawingState != -1 && loc.x >= 230 && loc.x <= 365 && loc.y >= 275 && loc.y <= 310) {
-            canvas.paint(Drawing.HOVER_CREATE_BUTTON);
-        } else if (canvas.drawingState != 0) {
-            canvas.paint(Drawing.PAINT_MENU);
+        if (canvas.drawingState == Drawing.DEFAULT_MENU_STATE) {
+            if (LOAD_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.HOVER_LOAD_BUTTON);
+            } else if (CREATE_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.HOVER_CREATE_BUTTON);
+            }
+        } else if (canvas.drawingState == Drawing.DEFAULT_HOVER_STATE) {
+            if (!LOAD_BUTTON_BOUNDS.contains(loc) && !CREATE_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.DEFAULT_MENU);
+            }
+        } else if (canvas.drawingState == Drawing.CREATE_MENU_STATE) {
+            if (BACK_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.HOVER_CREATE_BACK);
+            }
+        } else if (canvas.drawingState == Drawing.CREATE_HOVER_STATE) {
+            if (!BACK_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.CREATE_MENU);
+            }
+        } else if (canvas.drawingState == Drawing.LOAD_MENU_STATE) {
+            if (BACK_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.HOVER_LOAD_BACK);
+            }
+        } else if (canvas.drawingState == Drawing.LOAD_HOVER_STATE) {
+            if (!BACK_BUTTON_BOUNDS.contains(loc)) {
+                canvas.paint(Drawing.LOAD_MENU);
+            }
         }
     }
 
