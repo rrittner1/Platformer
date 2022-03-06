@@ -15,7 +15,7 @@ public class Drawing extends JPanel {
     public static final int HOVER_LOAD_BACK = 7;
     public static final int HOVER_CREATE_INSTRUCTIONS = 8;
     public static final int HOVER_CREATE_DRAW = 9;
-    public static final int DRAW_LINE = 10;
+    public static final int HOVER_CREATE_SAVE = 10;
     //drawingStates
     public static final int DEFAULT_MENU_STATE = 0;
     public static final int DEFAULT_HOVER_STATE = -1;
@@ -91,7 +91,10 @@ public class Drawing extends JPanel {
                 drawRectangle(g2, Manager.DRAW_BUTTON, 4);
                 drawingState = CREATE_HOVER_STATE;
                 break;
-
+            case HOVER_CREATE_SAVE:
+                drawRectangle(g2, Manager.SAVE_BUTTON, 4);
+                drawingState = CREATE_HOVER_STATE;
+                break;
         }
     }
 
@@ -123,7 +126,7 @@ public class Drawing extends JPanel {
         for (int i = 0; i < 600; i++) {
             for (int j = 0; j < 600; j++) {
                 if (m.activeMap[i + m.xOffset][j] == 1) {
-                    g2.drawRect(i, j, 1, 1);
+                    g2.fillRect(i, j, 1, 1);
                 }
             }
         }
@@ -153,6 +156,12 @@ public class Drawing extends JPanel {
         g2.setColor(Color.BLACK);
         g2.drawString("Draw", 50, 514);
         drawRectangle(g2, Manager.DRAW_BUTTON, 2);
+
+        g2.setColor(Color.WHITE);
+        g2.fillRect(480, 82, 60, 35);
+        g2.setColor(Color.BLACK);
+        g2.drawString("Save", 488, 106);
+        drawRectangle(g2, Manager.SAVE_BUTTON, 2);
     }
 
     public void loadMenuDraw(Graphics2D g2) {

@@ -8,6 +8,7 @@ public class Manager implements Runnable {
     static final Rectangle BACK_BUTTON = new Rectangle(42, 32, 60, 35);
     static final Rectangle INSTRUCTIONS_BUTTON = new Rectangle(415, 32, 125, 35);
     static final Rectangle DRAW_BUTTON = new Rectangle(42, 490, 60, 35);
+    static final Rectangle SAVE_BUTTON = new Rectangle(480, 82, 60, 35);
 
     static final int mapWidth = 60000;
     static final int mapHeight = 600;
@@ -93,6 +94,8 @@ public class Manager implements Runnable {
                         canvas.specialState = Drawing.BASE_STATE;
                     }
                     canvas.paint(Drawing.HOVER_CREATE_DRAW);
+                } else if (SAVE_BUTTON.contains(loc)) {
+                    // do something
                 }
                 break;
             case Drawing.LOAD_HOVER_STATE:
@@ -106,7 +109,7 @@ public class Manager implements Runnable {
                         startPoint = loc;
                     } else {
                         endPoint = loc;
-                        // something to save the value to the array
+                        saveLine();
                         startPoint.x = -69;
                         startPoint.y = -69;
                     }
@@ -156,6 +159,8 @@ public class Manager implements Runnable {
                     canvas.paint(Drawing.HOVER_CREATE_INSTRUCTIONS);
                 } else if (DRAW_BUTTON.contains(loc)) {
                     canvas.paint(Drawing.HOVER_CREATE_DRAW);
+                } else if (SAVE_BUTTON.contains(loc)) {
+                    canvas.paint(Drawing.HOVER_CREATE_SAVE);
                 } else {
                     if (canvas.specialState == Drawing.DRAW_STATE) {
                         if (startPoint.x != -69) {
@@ -166,7 +171,7 @@ public class Manager implements Runnable {
                 break;
             case Drawing.CREATE_HOVER_STATE:
                 if (!BACK_BUTTON.contains(loc) && !INSTRUCTIONS_BUTTON.contains(loc) &&
-                        !DRAW_BUTTON.contains(loc)) {
+                        !DRAW_BUTTON.contains(loc) && !SAVE_BUTTON.contains(loc)) {
                     canvas.paint(Drawing.CREATE_MENU);
                 }
                 break;
@@ -193,5 +198,70 @@ public class Manager implements Runnable {
 
     public void keyReleased(KeyEvent e) {
 
+    }
+
+    public void saveLine() {
+        int sx = startPoint.x;
+        int sy = startPoint.y;
+        int ex = endPoint.x;
+        int ey = endPoint.y;
+        if (Math.abs(sx - ex) > Math.abs(sy - ey)) {
+            int largerX = 0;
+            int smallerX = 0;
+            if (sx > ex) {
+                largerX = sx;
+                smallerX = ex;
+            } else {
+                largerX = ex;
+                smallerX = sx;
+            }
+            for (int i = smallerX; i < largerX; i++) {
+                for (int j = 0; j < 600; j++) {
+                    double lineY = (1.0 * (ey - sy)/(ex - sx)) * (i - sx) + sy;
+                    if (Math.abs(j - lineY) < 3) {
+                        activeMap[i + xOffset][j] = 1;
+                    }
+                }
+            }
+        } else {
+            int largerY = 0;
+            int smallerY = 0;
+            if (sy > ey) {
+                largerY = sy;
+                smallerY = ey;
+            } else {
+                largerY = ey;
+                smallerY = sy;
+            }
+            for (int i = 0; i < 600; i++) {
+                for (int j = smallerY; j < largerY; j++) {
+                    double lineX = (1.0 * (ex - sx)/(ey - sy)) * (j - sy) + sx;
+                    if (Math.abs(i - lineX) < 3) {
+                        activeMap[i + xOffset][j] = 1;
+                    }
+                }
+            }
+        }
+                        /* Draws elipses
+                        double distance = Math.sqrt(Math.pow(startPoint.x - endPoint.x, 2)
+                                + Math.pow(startPoint.y - endPoint.y, 2));
+                        for (int i = 0; i < 600; i++) {
+                            for (int j = 0; j < 600; j++) {
+                                double startDistance = Math.sqrt(Math.pow(startPoint.x - i, 2)
+                                        + Math.pow(startPoint.y - j, 2));
+                                double endDistance = Math.sqrt(Math.pow(i - endPoint.x, 2)
+                                        + Math.pow(j - endPoint.y, 2));
+                                double divider = 1;
+                                if (startDistance / endDistance > 1) {
+                                    divider = Math.sqrt(startDistance) / endDistance;
+                                } else {
+                                    divider = Math.sqrt(endDistance) / startDistance;
+                                }
+                                if ((startDistance + endDistance - distance) / divider < 0.2) {
+                                    activeMap[i + xOffset][j] = 1;
+                                }
+                            }
+                        }
+                         */
     }
 }
