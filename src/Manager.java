@@ -20,10 +20,12 @@ public class Manager implements Runnable {
     Listener listener; // JPanel that acts as listener for all events
     Container contentPane; // frame's contentPane
     int[][] activeMap; // array of all pixels in a given level
-    Point startPoint; // start point for 2-click lines
-    Point endPoint; // end point for 2-click lines
-    Point loc; // current location of mouse, updates on every movement/click
+    Point startPoint; // start point for 2-click lines -- Absolute coordinate
+    Point endPoint; // end point for 2-click lines -- Absolute coordinate
+    Point loc; // current location of mouse, updates on every movement/click -- relative coordinate
     int xOffset; // how many pixels into the level the screen is
+    Timer manualScrollTimer; // timer to scroll screen while a or d keys pressed
+    char scrollDirection; // a to scroll left, d to scroll right
 
     /**
      * Sets up JFrame, initializes instance variables.
@@ -47,9 +49,10 @@ public class Manager implements Runnable {
             }
         });
         contentPane = frame.getContentPane();
-        // canvas is the JPanel that gets drawn on
+        // canvas is the JPanel that menus and buttons get drawn on
         canvas = new Drawing(this);
         canvas.setBounds(0, 0, 600, 600);
+        canvas.setBackground(new Color(0, 0, 0, 0));
         // listener is a transparent JPanel on top of drawing that is its own action listener,
         // all event methods just get passed to methods of the same name below
         listener = new Listener(this);
@@ -62,6 +65,14 @@ public class Manager implements Runnable {
         startPoint = new Point(-69, -69); // default OOB values
         endPoint = new Point(-69, -69);
         xOffset = 0;
+        loc = new Point(-69, -69);
+        manualScrollTimer = new Timer(10, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                scrollScreen();
+            }
+        });
+        scrollDirection = '\0';
     }
     @Override
     public void run() {
@@ -119,8 +130,10 @@ public class Manager implements Runnable {
                 if (canvas.specialState == Drawing.DRAW_STATE) { // if in draw state update/draw 2-click line
                     if (startPoint.x == -69) {
                         startPoint = loc;
+                        startPoint.x += xOffset;
                     } else {
                         endPoint = loc;
+                        endPoint.x += xOffset;
                         saveLine(); // saves drawn line to activeMap level array
                         startPoint.x = -69; // resets start point to default OOB value
                         startPoint.y = -69;
@@ -209,12 +222,49 @@ public class Manager implements Runnable {
 
     }
 
+    /**
+     * key pressed listener: starts timer if a or d is pressed
+     * @param e
+     */
     public void keyPressed(KeyEvent e) {
-
+        char c = e.getKeyChar();
+        if (c == 'a' || c == 'd') {
+            if (scrollDirection == 'a' || scrollDirection == 'd') {
+                manualScrollTimer.stop();
+            }
+            scrollDirection = c;
+            manualScrollTimer.start();
+        }
     }
 
+    /**
+     * key released listener: stops timer if a or d is released.
+     * @param e
+     */
     public void keyReleased(KeyEvent e) {
+        char c = e.getKeyChar();
+        if (c == 'a' || c == 'd') {
+            manualScrollTimer.stop();
+            scrollDirection = '\0';
+        }
+    }
 
+    /**
+     * called by timer, moves the screen 5 pixels every hundredth of a second while timer runs.
+     */
+    public void scrollScreen() {
+        if (scrollDirection == 'a') {
+            if (xOffset > 0) {
+                xOffset -= 5;
+            }
+        } else if (scrollDirection == 'd') {
+            if (xOffset < 54000) {
+                xOffset += 5;
+            }
+        } else {
+            System.out.println("error246");
+        }
+        canvas.paint(Drawing.CREATE_MENU);
     }
 
     /**
@@ -244,7 +294,7 @@ public class Manager implements Runnable {
                 for (int j = 0; j < 600; j++) {
                     double lineY = (1.0 * (ey - sy)/(ex - sx)) * (i - sx) + sy;
                     if (Math.abs(j - lineY) < 3) { // for each point within x bounds check to see if y is close to line
-                        activeMap[i + xOffset][j] = 1; // if so set array point to 1
+                        activeMap[i][j] = 1; // if so set array point to 1
                     }
                 }
             }
@@ -258,11 +308,11 @@ public class Manager implements Runnable {
                 largerY = ey;
                 smallerY = sy;
             }
-            for (int i = 0; i < 600; i++) {
+            for (int i = xOffset; i < 600 + xOffset; i++) {
                 for (int j = smallerY; j < largerY; j++) {
                     double lineX = (1.0 * (ex - sx)/(ey - sy)) * (j - sy) + sx;
                     if (Math.abs(i - lineX) < 3) {
-                        activeMap[i + xOffset][j] = 1;
+                        activeMap[i][j] = 1;
                     }
                 }
             }

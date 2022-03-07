@@ -18,6 +18,8 @@ public class Drawing extends JPanel {
     public static final int HOVER_CREATE_INSTRUCTIONS = 8; // draw create menu with thicker instructions button
     public static final int HOVER_CREATE_DRAW = 9; // draw create menu with thicker draw button
     public static final int HOVER_CREATE_SAVE = 10; // draw create menu with thicker save button
+    public static final int REDRAW_LEVEL_BACKGROUND = 11; // redraws level in background of whatever menu is open
+    public static final int DRAW_2_CLICK_LINE = 12; // redraws level in background and adds active line
     /**
      * menuStates: signifier of current status of image on drawing
      */
@@ -67,6 +69,7 @@ public class Drawing extends JPanel {
      */
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         switch (paintInstructions) {
             case DEFAULT_MENU: // draw root menu
@@ -113,6 +116,15 @@ public class Drawing extends JPanel {
                 drawRectangle(g2, Manager.SAVE_BUTTON, 4);
                 drawingState = CREATE_HOVER_STATE;
                 break;
+                /*
+            case REDRAW_LEVEL_BACKGROUND: // redraws level in background of whatever menu is open
+                clearBackGround(g2);
+                drawActiveMap(g2);
+                break;
+            case DRAW_2_CLICK_LINE: // redraws level in background and adds active line
+                clearBackGround(g2);
+                drawActive2click(g2);
+*/
         }
     }
 
@@ -123,7 +135,11 @@ public class Drawing extends JPanel {
     public void clearDraw(Graphics2D g2) {
         g2.clearRect(0, 0, 600, 600);
     }
+/*
+    public void clearBackGround(Graphics2D g2) {
 
+    }
+    */
     /**
      * draws given rectangle with given thickness
      * @param g2
@@ -138,6 +154,27 @@ public class Drawing extends JPanel {
         g2.setStroke(new BasicStroke(thickness));
         g2.drawRect(x, y, w, h);
         g2.setStroke(new BasicStroke(1));
+    }
+
+    /**
+     * redraws activeMap level array
+     * @param g2
+     */
+    public void drawActiveMap(Graphics2D g2) {
+        for (int i = 0; i < 600; i++) { // draws anything saved in level array
+            for (int j = 0; j < 600; j++) {
+                if (m.activeMap[i + m.xOffset][j] == 1) {
+                    g2.fillRect(i, j, 1, 1);
+                }
+            }
+        }
+    }
+
+    public void drawActive2click(Graphics2D g2) {
+        if (m.startPoint.x != -69) { // if 2-click line is active draw line at current mouse location
+            g2.setStroke(new BasicStroke(5));
+            g2.drawLine(m.startPoint.x - m.xOffset, m.startPoint.y, m.loc.x, m.loc.y);
+        }
     }
 
     /**
@@ -159,20 +196,11 @@ public class Drawing extends JPanel {
      * @param g2
      */
     public void createMenuDraw(Graphics2D g2) {
-        for (int i = 0; i < 600; i++) { // draws anything saved in level array
-            for (int j = 0; j < 600; j++) {
-                if (m.activeMap[i + m.xOffset][j] == 1) {
-                    g2.fillRect(i, j, 1, 1);
-                }
-            }
-        }
+        drawActiveMap(g2);
         if (specialState == DRAW_STATE) {
+            drawActive2click(g2);
             g2.setFont(new Font("", 1, 25));
             g2.drawString("Drawing", 230, 50); // if in active drawing state signify with text
-            if (m.startPoint.x != -69) { // if 2-click line is active draw line at current mouse location
-                g2.setStroke(new BasicStroke(5));
-                g2.drawLine(m.startPoint.x, m.startPoint.y, m.loc.x, m.loc.y);
-            }
         }
         // draw back button
         g2.setColor(Color.WHITE);
