@@ -2,7 +2,15 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class Listener extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
+    /**
+     * All listener methods in this class get passed straight to Manager
+     */
     Manager m;
+
+    /**
+     * initializes Manager m, adds itself as its own listener
+     * @param m
+     */
     public Listener(Manager m) {
         super();
         this.m = m;
