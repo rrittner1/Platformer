@@ -118,7 +118,7 @@ public class Manager implements Runnable {
                     }
                     canvas.paint(Drawing.HOVER_CREATE_DRAW);
                 } else if (SAVE_BUTTON.contains(loc)) {
-                    // do something
+                    System.out.println("here");
                 }
                 break;
             case Drawing.LOAD_HOVER_STATE: // something being hovered on in load menu
@@ -269,74 +269,106 @@ public class Manager implements Runnable {
 
     /**
      * saves current 2-click line to activeMap array
-     * calculates slope, takes each x value between 2 points, checks every y (should be changed to each y between points)
-     * to see if it is close to line found from y = m(x-x1)+y1
-     * (if line mostly vertical coordinates inverted to increase accuracy)
-     * Still quite scuffed but mostly works
-     * After reading through this again this is comically unoptimized and generally shit
+     * works other than perfectly vertical lines
+     * the lines don't look good but can confirm it is a problem with drawing
+     * they get saved to array properly
      */
     public void saveLine() {
+        int width = 5;
         int sx = startPoint.x;
         int sy = startPoint.y;
         int ex = endPoint.x;
         int ey = endPoint.y;
-        if (Math.abs(sx - ex) > Math.abs(sy - ey)) { // checks if line is mostly horizontal
-            int largerX = 0; // find which point has smaller x values
-            int smallerX = 0;
-            if (sx > ex) {
-                largerX = sx;
-                smallerX = ex;
-            } else {
-                largerX = ex;
-                smallerX = sx;
+        int smallerX;
+        int largerX;
+        int smallerY;
+        int largerY;
+        if (sx < ex) {
+            smallerX = sx;
+            largerX = ex;
+        } else {
+            smallerX = ex;
+            largerX = sx;
+        }
+        if (sy < ey) {
+            smallerY = sy;
+            largerY = ey;
+        } else {
+            smallerY = ey;
+            largerY = sy;
+        }
+        if (Math.abs(ex - sx) > Math.abs(ey - sy)) {
+            double m = 1.0 * (ey - sy) / (ex - sx);
+            double r = 0;
+            if (m != 0) {
+                r = -1 / m;
             }
-            for (int i = smallerX; i < largerX; i++) {
-                for (int j = 0; j < 600; j++) {
-                    double lineY = (1.0 * (ey - sy)/(ex - sx)) * (i - sx) + sy;
-                    if (Math.abs(j - lineY) < 3) { // for each point within x bounds check to see if y is close to line
-                        activeMap[i][j] = 1; // if so set array point to 1
+            for (int i = xOffset + smallerX - width / 2; i < xOffset + largerX + width / 2; i++) {
+                for (int j = smallerY - width / 2; j < largerY + width / 2; j++) {
+                    double lLineY = m * (i - sx) + sy - (width / 2.0) * Math.sqrt(1 + m * m);
+                    double uLineY = m * (i - sx) + sy + (width / 2.0) * Math.sqrt(1 + m * m);
+                    double sTipY = r * (i - sx) + sy;
+                    double eTipY = r * (i - ex) + ey;
+                    double uTipY;
+                    double lTipY;
+                    if (sTipY > eTipY) {
+                        uTipY = sTipY;
+                        lTipY = eTipY;
+                    } else {
+                        uTipY = eTipY;
+                        lTipY = sTipY;
                     }
-                }
-            }
-        } else { // same as above but with inverted coordinates if line is mostly vertical
-            int largerY = 0;
-            int smallerY = 0;
-            if (sy > ey) {
-                largerY = sy;
-                smallerY = ey;
-            } else {
-                largerY = ey;
-                smallerY = sy;
-            }
-            for (int i = xOffset; i < 600 + xOffset; i++) {
-                for (int j = smallerY; j < largerY; j++) {
-                    double lineX = (1.0 * (ex - sx)/(ey - sy)) * (j - sy) + sx;
-                    if (Math.abs(i - lineX) < 3) {
-                        activeMap[i][j] = 1;
-                    }
-                }
-            }
-        } // weird idea to draw line with semi-elliptic figures
-                        /* Draws ellipses
-                        double distance = Math.sqrt(Math.pow(startPoint.x - endPoint.x, 2)
-                                + Math.pow(startPoint.y - endPoint.y, 2));
-                        for (int i = 0; i < 600; i++) {
-                            for (int j = 0; j < 600; j++) {
-                                double startDistance = Math.sqrt(Math.pow(startPoint.x - i, 2)
-                                        + Math.pow(startPoint.y - j, 2));
-                                double endDistance = Math.sqrt(Math.pow(i - endPoint.x, 2)
-                                        + Math.pow(j - endPoint.y, 2));
-                                double divider = 1;
-                                if (startDistance / endDistance > 1) {
-                                    divider = Math.sqrt(startDistance) / endDistance;
-                                } else {
-                                    divider = Math.sqrt(endDistance) / startDistance;
-                                }
-                                if ((startDistance + endDistance - distance) / divider < 0.2) {
-                                    activeMap[i + xOffset][j] = 1;
-                                }
+                    if (m != 0) {
+                        if (j >= lLineY && j >= lTipY && j <= uLineY && j <= uTipY) {
+                            if (i >= 0 && i < 60000 && j >= 0 && j < 600) {
+                                activeMap[i][j] = 1;
                             }
                         }
-                         */
+                    } else {
+                        if (j >= lLineY && j <= uLineY) {
+                            if (i >= 0 && i < 60000 && j >= 0 && j < 600) {
+                                activeMap[i][j] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            double m = 1.0 * (ex - sx) / (ey - sy);
+            double r = 0;
+            if (m != 0) {
+                r = -1 / m;
+            }
+            for (int i = xOffset + smallerX - width / 2; i < xOffset + largerX + width / 2; i++) {
+                for (int j = smallerY - width / 2; j < largerY + width / 2; j++) {
+                    double lLineX = m * (j - sy) + sx - (width / 2.0) * Math.sqrt(1 + m * m);
+                    double uLineX = m * (j - sy) + sx + (width / 2.0) * Math.sqrt(1 + m * m);
+                    double sTipX = r * (j - sy) + sx;
+                    double eTipX = r * (j - ey) + ex;
+                    double uTipX;
+                    double lTipX;
+                    if (sTipX > eTipX) {
+                        uTipX = sTipX;
+                        lTipX = eTipX;
+                    } else {
+                        uTipX = eTipX;
+                        lTipX = sTipX;
+                    }
+                    if (m != 0) {
+                        if (i >= lLineX && i >= lTipX && i <= uLineX && i <= uTipX) {
+                            if (i >= 0 && i < 60000 && j >= 0 && j < 600) {
+                                activeMap[i][j] = 1;
+                            }
+                        }
+                    } else {
+                        if (i >= lLineX && j <= uLineX) {
+                            if (i >= 0 && i < 60000 && j >= 0 && j < 600) {
+                                activeMap[i][j] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
