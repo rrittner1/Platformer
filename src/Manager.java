@@ -1,6 +1,10 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 
 public class Manager implements Runnable {
     // Rectangle objects representing various buttons
@@ -118,7 +122,7 @@ public class Manager implements Runnable {
                     }
                     canvas.paint(Drawing.HOVER_CREATE_DRAW);
                 } else if (SAVE_BUTTON.contains(loc)) {
-                    System.out.println("here");
+                    saveFile();
                 }
                 break;
             case Drawing.LOAD_HOVER_STATE: // something being hovered on in load menu
@@ -267,6 +271,29 @@ public class Manager implements Runnable {
         canvas.paint(Drawing.CREATE_MENU);
     }
 
+    /**
+     * This opens a JFileChooser and allows the user to choose a file name for the level
+     */
+    public void saveFile() {
+        JFileChooser jfc = new JFileChooser("C:/Users/rdrit/OneDrive/Documents/Java Files/Platformer/Levels");
+        jfc.setDialogTitle("Choose level name and save in Levels folder as .plvl file");
+        int userSelection = jfc.showSaveDialog(frame);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = jfc.getSelectedFile();
+            try {
+                PrintWriter pw = new PrintWriter(fileToSave);
+                for (int i = 0; i < 60000; i++) {
+                    for (int j = 0; j < 600; j++) {
+                        pw.print(activeMap[i][j] + " ");
+                    }
+                    pw.println();
+                }
+                pw.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     /**
      * saves current 2-click line to activeMap array
      * works other than perfectly vertical lines
